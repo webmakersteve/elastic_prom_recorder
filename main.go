@@ -12,8 +12,6 @@ import (
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})
 
-	http.Handle("/metrics", promhttp.Handler())
-
 	serviceConfig, err := config.Load("/Users/stephen/go/src/github.com/webmakersteve/elastic_prom_recorder/example.yaml")
 
 	if err != nil {
@@ -21,7 +19,7 @@ func main() {
 	}
 
 	// Really want to make a list of the group runners
-	
+
 	for _, group := range serviceConfig.Groups {
 		g, err := recorder.NewGroup(&group)
 
@@ -33,5 +31,6 @@ func main() {
 		go recorder.Execute(&g, context.Background())
 	}
 
+	http.Handle("/metrics", promhttp.Handler())
 	http.ListenAndServe(":8080", nil)
 }

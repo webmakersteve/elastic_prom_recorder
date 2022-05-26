@@ -9,10 +9,18 @@ groups:
       # password: ""
     interval: 1m
     rules:
-      - record: job:http_inprogress_requests:sum
+      - record: test:matching_docs:sum
         query: >-
           {
-            "foo": "bar"
+            "query": {
+              "bool": {
+                "must": {
+                  "match": {
+                    "title": "foo"
+                  }
+                }
+              }
+            }
           }
         # Labels to add to the rule
         labels:

@@ -67,12 +67,19 @@ func NewGroup(group *config.Group) (Group, error) {
 	g.index = group.Elasticsearch.Index
 
 	for i, rule := range group.Rules {
+		labels := prometheus.Labels{
+			"recording_group": group.Name,
+		}
+
+		for k, v := range rule.Labels {
+			labels[k] = v
+		}
+
 		name := rule.Record + ":" + group.Interval
 		gauge := prometheus.NewGauge(prometheus.GaugeOpts{
-			Name: name,
-			ConstLabels: prometheus.Labels{
-				"recording_group": group.Name,
-			},
+			Name:        name,
+			ConstLabels: labels,
+			Help:        "The total number of processed events",
 		})
 
 		if !json.Valid([]byte(rule.Query)) {
@@ -119,8 +126,6 @@ func Execute(group *Group, ctx context.Context) {
 }
 
 func executeRule(group *Group, rule *recordingRule) error {
-	// json.Valid([]byte(query))
-
 	es := group.elasticClient
 
 	result, err := es.Search(
@@ -134,8 +139,12 @@ func executeRule(group *Group, rule *recordingRule) error {
 
 	defer result.Body.Close()
 
+	response := result.String()
+
+	log.Info(response)
+
 	// Parse out the body and set the gauge
-	rule.gauge.Inc()
+	rule.gauge.Set(1)
 
 	return nil
 }
