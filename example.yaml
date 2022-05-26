@@ -1,0 +1,20 @@
+groups:
+  - name: telemetry_us
+    # Describe the source for the group
+    elasticsearch:
+      addresses:
+      - http://localhost:9200
+      index: "telemetry-v2-*"
+      # username: ""
+      # password: ""
+    interval: 1m
+    rules:
+      - record: job:http_inprogress_requests:sum
+        query: >-
+          {
+            "foo": "bar"
+          }
+        # Labels to add to the rule
+        labels:
+          label_key: label_value
+
